@@ -1,0 +1,38 @@
+{% extends 'management/base.html' %}
+
+{% block title %}Add Floor to {{ location.name }} | KIMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'location_list' %}">Locations</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'floor_list' location.id %}">{{ location.name }}</a></li>
+                <li class="breadcrumb-item active">New Floor</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow border-0">
+            <div class="card-header bg-success text-white py-3">
+                <h4 class="mb-0 text-center">New Floor for {{ location.name }}</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Floor Name or Number</label>
+                        {{ form.name }}
+                        <div class="form-text text-muted">Example: Ground Floor, 1st Floor, or Basement.</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Save Floor</button>
+                        <a href="{% url 'floor_list' location.id %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'management/base.html' %}
+
+{% block title %}Add Room to {{ floor.name }} | KIMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'location_list' %}">Locations</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'floor_list' floor.location.id %}">{{ floor.location.name }}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'room_list' floor.id %}">{{ floor.name }}</a></li>
+                <li class="breadcrumb-item active">Add Room</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow border-0">
+            <div class="card-header bg-success text-white py-3">
+                <h4 class="mb-0 text-center">New Room for {{ floor.name }}</h4>
+                <p class="mb-0 text-center small">({{ floor.location.name }})</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Room Number or Name</label>
+                        {{ form.room_number }}
+                        <div class="form-text text-muted">Example: 101, Meeting Room A, or Suite 202.</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Save Room</button>
+                        <a href="{% url 'room_list' floor.id %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

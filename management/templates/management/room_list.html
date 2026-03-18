@@ -1,0 +1,56 @@
+{% extends 'management/base.html' %}
+
+{% block title %}Rooms in {{ floor.name }} | KIMS{% endblock %}
+
+{% block content %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'location_list' %}">Locations</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'floor_list' floor.location.id %}">{{ floor.location.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ floor.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <div>
+            <h2 class="mb-0">Rooms in {{ floor.name }}</h2>
+            <small class="text-muted">Location: {{ floor.location.name }}</small>
+        </div>
+        <a href="{% url 'add_room' floor.id %}" class="btn btn-success shadow-sm">+ Add New Room</a>
+    </div>
+
+    <div class="row">
+        {% for room in rooms %}
+        <div class="col-md-4 col-lg-3 mb-4">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <span class="badge bg-info text-dark">Room</span>
+                        <h4 class="card-title mt-2">{{ room.room_number }}</h4>
+                    </div>
+                    <hr class="my-3">
+
+                    <a href="{% url 'item_list' room.id %}" class="btn btn-primary w-100 mb-2">View Items</a>
+
+                    <a href="{% url 'delete_room' room.id %}"
+                       class="btn btn-link text-danger btn-sm text-decoration-none"
+                       onclick="return confirm('Are you sure? This will delete Room {{ room.room_number }} and ALL inventory items inside it.')">
+                       Delete Room
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="p-5 bg-white rounded shadow-sm">
+                <p class="text-muted mb-0">No rooms have been added to this floor yet.</p>
+                <a href="{% url 'add_room' floor.id %}" class="btn btn-link mt-2">Add the first room now</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-4">
+        <a href="{% url 'floor_list' floor.location.id %}" class="btn btn-outline-secondary">&larr; Back to Floors</a>
+    </div>
+{% endblock %}

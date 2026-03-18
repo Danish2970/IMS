@@ -1,0 +1,113 @@
+{% extends 'management/base.html' %}
+
+{% block title %}Inventory: Room {{ room.room_number }} | KIMS{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'location_list' %}">Locations</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'floor_list' room.floor.location.id %}">{{ room.floor.location.name }}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'room_list' room.floor.id %}">{{ room.floor.name }}</a></li>
+        <li class="breadcrumb-item active">Room {{ room.room_number }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <h2 class="text-dark mb-0">Inventory: Room {{ room.room_number }}</h2>
+    <div class="d-flex gap-2">
+        <a href="{% url 'export_excel' room.id %}" class="btn btn-outline-success shadow-sm">
+            Excel
+        </a>
+        <a href="{% url 'export_pdf' room.id %}" class="btn btn-outline-danger shadow-sm">
+            PDF
+        </a>
+        <a href="{% url 'add_item' room.id %}" class="btn btn-success shadow-sm">
+            + Add New Item
+        </a>
+    </div>
+</div>
+
+{% for cat in categories %}
+    <h4 class="mt-4 text-primary text-capitalize">
+        <i class="bi bi-tag-fill"></i> {{ cat }}
+    </h4>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle bg-white shadow-sm border">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width: 80px;">Image</th>
+                    <th>Item Name</th>
+                    <th>Brand</th>
+                    <th>Quantity</th>
+                    <th>Date In</th>
+                    <th>Date Out</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if items %}
+                    {% for item in items %}
+                        {% if item.category == cat %}
+                        <tr>
+                            <td class="text-center">
+                                {% if item.image %}
+                                    <a href="{{ item.image.url }}" target="_blank">
+                                        <img src="{{ item.image.url }}" alt="{{ item.item_name }}"
+                                             class="rounded border shadow-sm"
+                                             style="width: 50px; height: 50px; object-fit: cover;">
+                                    </a>
+                                {% else %}
+                                    <div class="rounded bg-light d-flex align-items-center justify-content-center border"
+                                         style="width: 50px; height: 50px;">
+                                        <small class="text-muted" style="font-size: 10px;">No Pic</small>
+                                    </div>
+                                {% endif %}
+                            </td>
+
+                            <td class="fw-bold">{{ item.item_name }}</td>
+                            <td>{{ item.brand|default:"-" }}</td>
+                            <td><span class="badge bg-info text-dark">{{ item.quantity }}</span></td>
+                            <td>{{ item.date_in|date:"M d, Y" }}</td>
+                            <td>
+                                {% if item.date_out %}
+                                    {{ item.date_out|date:"M d, Y" }}
+                                {% else %}
+                                    <span class="text-success small fw-bold">In Use</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <a href="{% url 'edit_item' item.id %}" class="btn btn-sm btn-warning">
+                                        Edit
+                                    </a>
+                                    <a href="{% url 'delete_item' item.id %}"
+                                       class="btn btn-sm btn-danger"
+                                       onclick="return confirm('Delete this {{ item.item_name }}?')">
+                                       Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No items added yet.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+{% empty %}
+    <div class="text-center mt-5">
+        <p class="text-muted">No categories found for this room.</p>
+    </div>
+{% endfor %}
+
+<div class="mt-4 mb-5">
+    <a href="{% url 'room_list' room.floor.id %}" class="btn btn-outline-secondary">
+        &larr; Back to Rooms
+    </a>
+</div>
+{% endblock %}

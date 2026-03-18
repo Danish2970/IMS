@@ -1,0 +1,27 @@
+{% extends 'management/base.html' %}
+
+{% block title %}Locations | KIMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Select Location</h2>
+    <a href="{% url 'add_location' %}" class="btn btn-success">+ Add New Location</a>
+</div>
+
+<div class="row">
+    {% for loc in locations %}
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body text-center">
+                <h5 class="card-title mb-3">{{ loc.name }}</h5>
+                <a href="{% url 'floor_list' loc.id %}" class="btn btn-primary w-100">View Floors</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center mt-5">
+        <p class="text-muted">No locations found. Start by adding one above!</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

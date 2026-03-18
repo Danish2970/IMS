@@ -1,0 +1,152 @@
+{% extends 'management/base.html' %}
+
+{% block title %}Live Inventory Dashboard | KIMS{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-dark fw-bold"><i class="bi bi-speedometer2"></i> Inventory Dashboard</h2>
+        <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline-danger shadow-sm">
+            <i class="bi bi-x-circle"></i> Clear All Filters
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4 bg-white border-start border-primary border-4">
+        <div class="card-body">
+            <form method="GET" id="filterForm" class="row g-3">
+                <div class="col-md-2">
+                    <label class="form-label fw-bold small text-muted">Location</label>
+                    <select name="location" class="form-select form-select-sm border-primary" onchange="this.form.submit()">
+                        <option value="">All Locations</option>
+                        {% for loc in locations %}
+                            <option value="{{ loc.id }}" {% if selected_location == loc.id|stringformat:"s" %}selected{% endif %}>{{ loc.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label fw-bold small text-muted">Floor</label>
+                    <select name="floor" class="form-select form-select-sm border-primary" onchange="this.form.submit()" {% if not floors %}disabled{% endif %}>
+                        <option value="">All Floors</option>
+                        {% for f in floors %}
+                            <option value="{{ f.id }}" {% if selected_floor == f.id|stringformat:"s" %}selected{% endif %}>{{ f.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label fw-bold small text-muted">Room</label>
+                    <select name="room" class="form-select form-select-sm border-primary" onchange="this.form.submit()" {% if not rooms %}disabled{% endif %}>
+                        <option value="">All Rooms</option>
+                        {% for r in rooms %}
+                            <option value="{{ r.id }}" {% if selected_room == r.id|stringformat:"s" %}selected{% endif %}>Room {{ r.room_number }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small text-muted">Date In Range (Filtering by Entry Date)</label>
+                    <div class="input-group input-group-sm">
+                        <input type="date" name="start_date" class="form-control border-primary" value="{{ start_date }}">
+                        <span class="input-group-text bg-primary text-white border-primary">to</span>
+                        <input type="date" name="end_date" class="form-control border-primary" value="{{ end_date }}">
+                        <button class="btn btn-primary px-3 shadow-sm" type="submit">
+                            <i class="bi bi-filter"></i> Apply Date
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if items %}
+        <div class="d-flex justify-content-between align-items-end mt-5 mb-3 border-bottom pb-2">
+            <div>
+                <h3 class="text-primary mb-0">
+                    {% if room_obj %}
+                        Inventory: Room {{ room_obj.room_number }}
+                    {% elif selected_location %}
+                        Inventory: Filtered View
+                    {% else %}
+                        Global Inventory: Showing Everything
+                    {% endif %}
+                </h3>
+                <p class="text-muted small mb-0">Results based on current filter selection.</p>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-dark px-3 py-2 fs-6 shadow-sm">{{ items.count }} Items Found</span>
+            </div>
+        </div>
+
+        {% for cat in categories %}
+            <div class="category-section mb-5">
+                <h5 class="mt-4 text-secondary text-uppercase fw-bold small tracking-wider">
+                    <i class="bi bi-tag-fill me-2"></i> {{ cat }}
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle bg-white shadow-sm border rounded overflow-hidden">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width: 70px;">Image</th>
+                                <th>Item Name</th>
+                                <th>Full Path (Loc/Floor/Room)</th>
+                                <th>Brand</th>
+                                <th class="text-center">Qty</th>
+                                <th>Date In</th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                                {% if item.category == cat %}
+                                <tr>
+                                    <td>
+                                        {% if item.image %}
+                                            <img src="{{ item.image.url }}" class="rounded border shadow-sm" style="width: 45px; height: 45px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="bg-light rounded text-center text-muted border" style="width: 45px; height: 45px; line-height: 45px; font-size: 9px;">No Image</div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="fw-bold text-dark">{{ item.item_name }}</td>
+                                    <td class="small text-muted">
+                                        {{ item.room.floor.location.name }} / {{ item.room.floor.name }} / Room {{ item.room.room_number }}
+                                    </td>
+                                    <td>{{ item.brand|default:"-" }}</td>
+                                    <td class="text-center">
+                                        <span class="badge rounded-pill bg-light text-dark border px-3">{{ item.quantity }}</span>
+                                    </td>
+                                    <td class="small">{{ item.date_in|date:"d M Y" }}</td>
+                                    <td class="text-center">
+                                        {% if item.date_out %}
+                                            <span class="badge bg-danger-subtle text-danger border border-danger">Checked Out</span>
+                                        {% else %}
+                                            <span class="badge bg-success-subtle text-success border border-success">In Stock</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endfor %}
+
+    {% else %}
+        <div class="text-center py-5 mt-5 border rounded bg-white shadow-sm">
+            <div class="mb-3">
+                <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
+            </div>
+            <h4 class="text-muted">No items found matching your filters</h4>
+            <p class="text-muted small">Try adjusting your date range or selecting a different location.</p>
+            <a href="{% url 'dashboard' %}" class="btn btn-primary mt-3">Reset All Filters</a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    /* Clean up category headers */
+    .tracking-wider { letter-spacing: 0.05em; }
+    .table-hover tbody tr:hover { background-color: rgba(13, 110, 253, 0.02); }
+</style>
+{% endblock %}
