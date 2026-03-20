@@ -26,7 +26,9 @@ SECRET_KEY = 'django-insecure-6hvao3mt^%!6se1=$#2es^d)#7$$@+ae2af+#jffg9(a5d-=yx
 DEBUG = False
 
 # Replace 192.168.1.XX with your actual IPv4 address
-ALLOWED_HOSTS = ['192.168.31.185', '127.0.0.1', 'localhost']
+# ALLOWED_HOSTS = ['192.168.31.185', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['*']
+
 
 # Application definition
 
@@ -90,14 +92,43 @@ WSGI_APPLICATION = 'KIMS.wsgi.application'
 #     }
 # }
 
-
+# --- Database Configuration ---
+import os
 import dj_database_url
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL')
-    )
-}
+if 'RENDER' in os.environ:
+    # Logic for Render.com deployment
+    if 'DATABASE_URL' in os.environ:
+        DATABASES = {
+            'default': dj_database_url.config(
+                conn_max_age=600,
+                ssl_require=True
+            )
+        }
+    else:
+        # Fallback for Render if no DB is linked yet
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
+else:
+    # Logic for Local Development (using SQLite by default)
+    # If you want to use MySQL locally, swap this out for your MySQL block.
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+# ------------------------------
+
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default=os.environ.get('DATABASE_URL')
+#     )
+# }
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -148,3 +179,6 @@ import os
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+
+
